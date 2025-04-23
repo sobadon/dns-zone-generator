@@ -36,10 +36,12 @@ func ReverseZone6(prefix netip.Prefix) string {
 	switch prefix.Bits() {
 	case 32:
 		idx = 24
+	case 40:
+		idx = 22
 	case 48:
 		idx = 20
 	default:
-		panic("invalid prefix size for ipv6. only /32 and /48 are supported")
+		panic("invalid prefix size for ipv6. only /32, /40 and /48 are supported")
 	}
 	name128 := ReverseName6(prefix.Addr())
 	return MustWithDot(strings.Join(strings.Split(name128, ".")[idx:], "."))

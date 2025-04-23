@@ -79,8 +79,12 @@ func run(cmd *cobra.Command, _ []string) error {
 		if zoneIPPrefix.Addr().Is4() && zoneIPPrefix.Bits() != 24 {
 			return errors.Errorf("invalid reverse zone prefix size: %d. ipv4 prefix only /24 are supported", zoneIPPrefix.Bits())
 		}
-		if zoneIPPrefix.Addr().Is6() && zoneIPPrefix.Bits() != 32 {
-			return errors.Errorf("invalid reverse zone prefix size: %d. ipv6 prefix only /32 are supported", zoneIPPrefix.Bits())
+		// 雑や
+		if zoneIPPrefix.Addr().Is6() &&
+			!(zoneIPPrefix.Bits() == 32 ||
+				zoneIPPrefix.Bits() == 40 ||
+				zoneIPPrefix.Bits() == 48) {
+			return errors.Errorf("invalid reverse zone prefix size: %d. ipv6 prefix only /32, /40, /48 are supported", zoneIPPrefix.Bits())
 		}
 		reverseZones = append(reverseZones, zoneIPPrefix)
 	}
