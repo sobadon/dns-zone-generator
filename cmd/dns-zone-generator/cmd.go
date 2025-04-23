@@ -14,6 +14,7 @@ const (
 	destDirKey      = "dest-dir"
 	forwardZonesKey = "forward-zones"
 	reverseZonesKey = "reverse-zones"
+	ttlKey          = "ttl"
 )
 
 func main() {
@@ -45,6 +46,7 @@ example:
 	rootCmd.Flags().StringArray(forwardZonesKey, []string{"zone1.example.", "zone2.example"}, "forward zone(s)")
 	// 実装が面倒なので、とりあえず制約
 	rootCmd.Flags().StringArray(reverseZonesKey, []string{"192.0.2.0/24", "2001:db8::/32"}, "reverse zone(s). limitation: ipv4 prefix size must be /24, ipv6 prefix size must be /32, /40, /48")
+	rootCmd.Flags().Int(ttlKey, 300, "DNS TTL")
 
 	viper.SetEnvPrefix("DNS_ZONE_GENERATOR")
 	viper.BindPFlags(rootCmd.Flags())

@@ -63,6 +63,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	destDir := viper.GetString(destDirKey)
+	ttl := viper.GetInt(ttlKey)
 
 	forwardZones := viper.GetStringSlice(forwardZonesKey)
 	reverseZonesStr := viper.GetStringSlice(reverseZonesKey)
@@ -90,7 +91,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	for _, zoneName := range forwardZones {
-		zoneText, err := generateForwardZoneText(zoneName, source)
+		zoneText, err := generateForwardZoneText(zoneName, ttl, source)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate forward zone text for %s", zoneName)
 		}
@@ -102,7 +103,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	}
 
 	for _, zoneIPPrefix := range reverseZones {
-		zoneText, err := generateReverseZoneText(zoneIPPrefix, source)
+		zoneText, err := generateReverseZoneText(zoneIPPrefix, ttl, source)
 		if err != nil {
 			return errors.Wrapf(err, "failed to generate reverse zone text for %s", zoneIPPrefix)
 		}
@@ -152,17 +153,17 @@ func loadSourceJSON(filePath string) (*Source, error) {
 	return &source, nil
 }
 
-func generateForwardZoneText(zoneName string, source *Source) (string, error) {
+func generateForwardZoneText(zoneName string, ttl int, source *Source) (string, error) {
 	zoneText := ""
 	for _, host := range source.Hosts {
 		if strings.HasSuffix(host.Name, zoneName) && host.IPv4Addr.IsValid() {
-			zoneText += fmt.Sprintf("%s IN A %s\n", zoneutil.MustWithDot(host.Name), host.IPv4Addr.String())
+			zoneText += fmt.Sprintf("%s %d IN A %s\n", zoneutil.MustWithDot(host.Name), ttl, host.IPv4Addr.String())
 		}
 	}
 	return zoneText, nil
 }
 
-func generateReverseZoneText(zoneIPPrefix netip.Prefix, source *Source) (string, error) {
+func generateReverseZoneText(zoneIPPrefix netip.Prefix, ttl int, source *Source) (string, error) {
 	zoneText := ""
 	for _, host := range source.Hosts {
 		reversedName := ""
@@ -174,7 +175,7 @@ func generateReverseZoneText(zoneIPPrefix netip.Prefix, source *Source) (string,
 			// その IP アドレスは管轄外のゾーン
 			continue
 		}
-		zoneText += fmt.Sprintf("%s IN PTR %s\n", reversedName, zoneutil.MustWithDot(host.Name))
+		zoneText += fmt.Sprintf("%s %d IN PTR %s\n", reversedName, ttl, zoneutil.MustWithDot(host.Name))
 	}
 	return zoneText, nil
 }
