@@ -64,7 +64,7 @@ func BuildZoneFileNameForwardZone(zoneName string) string {
 
 func BuildZoneFileNameReverseZone(zoneIPPrefix netip.Prefix) string {
 	if zoneIPPrefix.Addr().Is4() {
-		return ReverseZone4(zoneIPPrefix)
+		return MustWithNoDot(ReverseZone4(zoneIPPrefix)) + ".zone"
 	}
-	return ReverseZone6(zoneIPPrefix)
+	return MustWithNoDot(ReverseZone6(zoneIPPrefix)) + ".zone"
 }
