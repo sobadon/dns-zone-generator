@@ -156,8 +156,14 @@ func loadSourceJSON(filePath string) (*Source, error) {
 func generateForwardZoneText(zoneName string, ttl int, source *Source) (string, error) {
 	zoneText := ""
 	for _, host := range source.Hosts {
-		if strings.HasSuffix(host.Name, zoneName) && host.IPv4Addr.IsValid() {
+		if !strings.HasSuffix(host.Name, zoneName) {
+			continue
+		}
+		if host.IPv4Addr.IsValid() {
 			zoneText += fmt.Sprintf("%s %d IN A %s\n", zoneutil.MustWithDot(host.Name), ttl, host.IPv4Addr.String())
+		}
+		if host.IPv6Addr.IsValid() {
+			zoneText += fmt.Sprintf("%s %d IN AAAA %s\n", zoneutil.MustWithDot(host.Name), ttl, host.IPv6Addr.String())
 		}
 	}
 	return zoneText, nil
